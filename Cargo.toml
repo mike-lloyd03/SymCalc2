@@ -1,0 +1,20 @@
+[package]
+name = "calc2"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+name = "calc2"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "uniffi_bindgen.rs"
+
+[dependencies]
+kalk = "3.0.4"
+thiserror = "1.0.51"
+uniffi = { version = "0.25.3", features = ["cli"] }
+
+[build-dependencies]
+uniffi = { version = "0.25.3", features = ["build"] }

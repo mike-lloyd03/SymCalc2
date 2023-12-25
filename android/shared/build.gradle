@@ -1,0 +1,92 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.mozilla.rust-android-gradle.rust-android'
+}
+
+android {
+    namespace 'com.example.calc2.shared'
+    compileSdk 34
+
+    ndkVersion "26.1.10909125"
+
+    defaultConfig {
+        minSdk 34
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    sourceSets {
+        main.java.srcDirs += "${projectDir}/../../generated/java"
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+apply plugin: 'org.mozilla.rust-android-gradle.rust-android'
+
+cargo {
+    module  = "../.."
+    libname = "calc2"
+    targets = ["arm", "arm64", "x86", "x86_64"]
+}
+
+afterEvaluate {
+    // The `cargoBuild` task isn't available until after evaluation.
+    android.libraryVariants.configureEach { variant ->
+        def productFlavor = ""
+        variant.productFlavors.each {
+            productFlavor += "${it.name.capitalize()}"
+        }
+        def buildType = "${variant.buildType.name.capitalize()}"
+
+        tasks.named("compileDebugKotlin") {
+            it.dependsOn(tasks.named("typesGen"), tasks.named("bindGen"))
+        }
+
+        tasks.named("generate${productFlavor}${buildType}Assets") {
+            it.dependsOn(tasks.named("cargoBuild"))
+        }
+    }
+}
+
+
+tasks.register('bindGen', Exec) {
+    def outDir = "${projectDir}/../../generated"
+    workingDir "../../"
+    commandLine("sh", "-c",
+            """\
+            cargo build && \
+            target/debug/uniffi-bindgen generate \
+            --library target/debug/libcalc2.so \
+            --language kotlin \
+            --out-dir $outDir
+            """)
+}
+
+tasks.register('typesGen', Exec) {
+    workingDir "../../"
+    commandLine("sh", "-c", "cargo build")
+}
