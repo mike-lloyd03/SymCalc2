@@ -3,15 +3,12 @@ use kalk::parser;
 
 mod error;
 
-uniffi::setup_scaffolding!();
-
-type Result<T, E = ArithmeticError> = std::result::Result<T, E>;
+uniffi::setup_scaffolding!("calc2");
 
 #[uniffi::export]
-pub fn evaluate(expr: String) -> Result<f64> {
+pub fn evaluate(expr: String) -> Result<f64, ArithmeticError> {
     let mut parser_context = parser::Context::new();
-    let precision = 53;
-    let result = parser::eval(&mut parser_context, &expr, precision)
+    let result = parser::eval(&mut parser_context, &expr)
         .map_err(|_| ArithmeticError::Error)?
         .ok_or(ArithmeticError::Error)?;
 
@@ -23,7 +20,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_simple_arithmetic() -> Result<()> {
+    fn test_simple_arithmetic() -> Result<(), ArithmeticError> {
         assert_eq!(evaluate("2 + 2".into())?, 4.0);
         assert_eq!(evaluate("2 - 2".into())?, 0.0);
         assert_eq!(evaluate("2 * 2".into())?, 4.0);
@@ -33,13 +30,13 @@ mod tests {
     }
 
     #[test]
-    fn test_errors() -> Result<()> {
+    fn test_errors() -> Result<(), ArithmeticError> {
         assert!(evaluate("2 x 2".into()).is_err());
         Ok(())
     }
 
     #[test]
-    fn test_complex_arithmetic() -> Result<()> {
+    fn test_complex_arithmetic() -> Result<(), ArithmeticError> {
         assert_eq!(evaluate("2 (5 + 7)".into())?, 24.0);
         Ok(())
     }

@@ -31,11 +31,12 @@ android {
         jvmTarget = '1.8'
     }
     sourceSets {
-        main.java.srcDirs += "${projectDir}/../../generated/java"
+        main.java.srcDirs += "${projectDir}/../../generated"
     }
 }
 
 dependencies {
+    implementation "net.java.dev.jna:jna:5.13.0@aar"
 
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -78,9 +79,9 @@ tasks.register('bindGen', Exec) {
     workingDir "../../"
     commandLine("sh", "-c",
             """\
-            cargo build && \
-            target/debug/uniffi-bindgen generate \
-            --library target/debug/libcalc2.so \
+            cargo build --release && \
+            target/release/uniffi-bindgen generate \
+            --library target/release/libcalc2.so \
             --language kotlin \
             --out-dir $outDir
             """)
@@ -89,4 +90,16 @@ tasks.register('bindGen', Exec) {
 tasks.register('typesGen', Exec) {
     workingDir "../../"
     commandLine("sh", "-c", "cargo build")
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'javaPreCompileDebug' || task.name == 'javaPreCompileRelease')) {
+        task.dependsOn 'cargoBuild'
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if ((task.name == 'mergeDebugJniLibFolders' || task.name == 'mergeReleaseJniLibFolders')) {
+        task.dependsOn 'cargoBuild'
+    }
 }

@@ -11,9 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.calc2.ui.theme.Calc2Theme
+import com.example.calc2.shared.evaluate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val result = evaluate("2*9").toString()
         super.onCreate(savedInstanceState)
         setContent {
             Calc2Theme {
@@ -22,7 +24,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Greeting("2 * 9 = $result")
                 }
             }
         }

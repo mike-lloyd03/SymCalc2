@@ -12,7 +12,7 @@ name = "uniffi-bindgen"
 path = "uniffi_bindgen.rs"
 
 [dependencies]
-kalk = "3.0.4"
+kalk = { version = "3.0.4", default-features = false }
 thiserror = "1.0.51"
 uniffi = { version = "0.25.3", features = ["cli"] }
 
