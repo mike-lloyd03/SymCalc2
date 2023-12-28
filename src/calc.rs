@@ -5,17 +5,19 @@ use kalk::parser;
 
 #[derive(uniffi::Object)]
 pub struct Calc {
-    history: RwLock<Vec<HistoryItem>>,
-    // history: RwLock<Vec<(String, f64)>>,
+    // pub history: Arc<Mutex<Vec<HistoryItem>>>,
+    pub history: Arc<Mutex<Vec<String>>>,
 }
 
-#[derive(uniffi::Object, Debug)]
+#[derive(uniffi::Object)]
 pub struct HistoryItem {
     equation: RwLock<String>,
     solution: RwLock<f64>,
 }
 
+#[uniffi::export]
 impl HistoryItem {
+    #[uniffi::constructor]
     pub fn new(equation: String, solution: f64) -> Self {
         let equation = RwLock::new(equation);
         let solution = RwLock::new(solution);
@@ -27,9 +29,10 @@ impl HistoryItem {
 #[uniffi::export]
 impl Calc {
     #[uniffi::constructor]
-    pub fn new() -> Arc<Self> {
-        let history = RwLock::new(vec![]);
-        Arc::new(Self { history })
+    pub fn new() -> Self {
+        Self {
+            history: Arc::new(Mutex::new(vec![])),
+        }
     }
 
     pub fn evaluate(&self, expr: String) -> Result<f64, ArithmeticError> {
@@ -44,76 +47,75 @@ impl Calc {
     }
 
     fn push_history(&self, equation: String, solution: f64) {
-        let hist_item = HistoryItem::new(equation, solution);
+        // let hist_item = HistoryItem::new(equation, solution);
 
-        if let Ok(mut hist_lock) = self.history.write() {
-            hist_lock.push(hist_item)
-        }
+        self.history.lock().unwrap().push(equation);
     }
 
-    // pub fn get_history(&self) -> Vec<HistoryItem> {
-    //     if let Ok(history) = self.history.read() {
-    //         return history.into();
-    //     }
-    // }
+    pub fn get_history(&self) -> Vec<String> {
+        let hist = self.history.lock().unwrap().clone();
+        hist
+    }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[test]
-//     fn test_simple_arithmetic() -> Result<(), ArithmeticError> {
-//         let mut calc = Calc::new();
+    #[test]
+    fn test_simple_arithmetic() -> Result<(), ArithmeticError> {
+        let calc = Calc::new();
 
-//         assert_eq!(calc.evaluate("2 + 2".into())?, 4.0);
-//         assert_eq!(calc.evaluate("2 - 2".into())?, 0.0);
-//         assert_eq!(calc.evaluate("2 * 2".into())?, 4.0);
-//         assert_eq!(calc.evaluate("2 (2)".into())?, 4.0);
-//         assert_eq!(calc.evaluate("2 / 2".into())?, 1.0);
-//         Ok(())
-//     }
+        assert_eq!(calc.evaluate("2 + 2".into())?, 4.0);
+        assert_eq!(calc.evaluate("2 - 2".into())?, 0.0);
+        assert_eq!(calc.evaluate("2 * 2".into())?, 4.0);
+        assert_eq!(calc.evaluate("2 (2)".into())?, 4.0);
+        assert_eq!(calc.evaluate("2 / 2".into())?, 1.0);
+        Ok(())
+    }
 
-//     #[test]
-//     fn test_errors() -> Result<(), ArithmeticError> {
-//         let mut calc = Calc::new();
+    #[test]
+    fn test_errors() -> Result<(), ArithmeticError> {
+        let calc = Calc::new();
 
-//         assert!(calc.evaluate("2 x 2".into()).is_err());
-//         Ok(())
-//     }
+        assert!(calc.evaluate("2 x 2".into()).is_err());
+        Ok(())
+    }
 
-//     #[test]
-//     fn test_complex_arithmetic() -> Result<(), ArithmeticError> {
-//         let mut calc = Calc::new();
+    #[test]
+    fn test_complex_arithmetic() -> Result<(), ArithmeticError> {
+        let calc = Calc::new();
 
-//         assert_eq!(calc.evaluate("2 (5 + 7)".into())?, 24.0);
-//         Ok(())
-//     }
+        assert_eq!(calc.evaluate("2 (5 + 7)".into())?, 24.0);
+        Ok(())
+    }
 
-//     #[test]
-//     fn test_history() -> Result<(), ArithmeticError> {
-//         let mut calc = Calc::new();
-//         calc.evaluate("2 * 7".into())?;
-//         calc.evaluate("sqrt(81)".into())?;
-//         calc.evaluate("27 / 9 + 3".into())?;
+    #[test]
+    fn test_history() -> Result<(), ArithmeticError> {
+        let calc = Calc::new();
+        calc.evaluate("2 * 7".into())?;
+        calc.evaluate("sqrt(81)".into())?;
+        calc.evaluate("27 / 9 + 3".into())?;
 
-//         let expect = vec![
-//             HistoryItem {
-//                 equation: "2 * 7".into(),
-//                 solution: 14.0,
-//             },
-//             HistoryItem {
-//                 equation: "sqrt(81)".into(),
-//                 solution: 9.0,
-//             },
-//             HistoryItem {
-//                 equation: "27 / 9 + 3".into(),
-//                 solution: 6.0,
-//             },
-//         ];
+        let expect = vec![
+            HistoryItem::new("2 * 7".into(), 14.0),
+            HistoryItem::new("sqrt(81)".into(), 9.0),
+            HistoryItem::new("27 / 9 + 3".into(), 9.0),
+        ];
 
-//         assert_eq!(calc.get_history(), expect);
+        let mut expect: Vec<String> = expect
+            .iter()
+            .map(|h| h.equation.read().unwrap().clone())
+            .collect();
 
-//         Ok(())
-//     }
-// }
+        assert_eq!(calc.get_history(), expect);
+
+        calc.evaluate("1 + 1".into())?;
+
+        expect.push("1 + 1".into());
+
+        assert_eq!(calc.get_history(), expect);
+
+        Ok(())
+    }
+}

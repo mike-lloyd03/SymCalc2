@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,11 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.calc2.shared.evaluate
+import com.example.calc2.shared.Calc
 import com.example.calc2.ui.theme.Calc2Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val calc = Calc()
         super.onCreate(savedInstanceState)
         setContent {
             Calc2Theme {
@@ -32,7 +35,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    InputField()
+                    InputField(calc)
                 }
             }
         }
@@ -40,11 +43,15 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun InputField() {
+fun InputField(calc: Calc) {
     var input by remember { mutableStateOf("") }
     var answer by remember {
         mutableDoubleStateOf(0.0)
     }
+
+    var history = calc.getHistory()
+    print("History: ")
+    println(history)
 
     Column {
         Row {
@@ -57,7 +64,10 @@ fun InputField() {
             Button(
                 onClick = {
                     try {
-                        answer = evaluate(input)
+                        answer = calc.evaluate(input)
+                        history = calc.getHistory()
+                        print("History: ")
+                        println(history)
                     } catch (e: Exception) {
                         println(e)
                     }
@@ -68,14 +78,19 @@ fun InputField() {
             }
         }
         Text(answer.toString())
+        LazyColumn {
+            items(history) { history ->
+                Text(history)
+            }
+        }
     }
 
 }
 
-@Preview
-@Composable
-fun InputFieldPreview() {
-    Calc2Theme {
-        InputField()
-    }
-}
+//@Preview
+//@Composable
+//fun InputFieldPreview() {
+//    Calc2Theme {
+//        InputField()
+//    }
+//}
