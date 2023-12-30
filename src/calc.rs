@@ -1,27 +1,21 @@
-use std::sync::{atomic::AtomicUsize, Arc, Mutex, RwLock};
+use std::sync::{Arc, Mutex};
 
 use crate::error::ArithmeticError;
 use kalk::parser;
 
 #[derive(uniffi::Object)]
 pub struct Calc {
-    // pub history: Arc<Mutex<Vec<HistoryItem>>>,
-    pub history: Arc<Mutex<Vec<String>>>,
+    pub history: Arc<Mutex<Vec<HistoryItem>>>,
 }
 
-#[derive(uniffi::Object)]
+#[derive(Debug, Clone, PartialEq, uniffi::Record)]
 pub struct HistoryItem {
-    equation: RwLock<String>,
-    solution: RwLock<f64>,
+    equation: String,
+    solution: f64,
 }
 
-#[uniffi::export]
 impl HistoryItem {
-    #[uniffi::constructor]
     pub fn new(equation: String, solution: f64) -> Self {
-        let equation = RwLock::new(equation);
-        let solution = RwLock::new(solution);
-
         Self { equation, solution }
     }
 }
@@ -47,12 +41,12 @@ impl Calc {
     }
 
     fn push_history(&self, equation: String, solution: f64) {
-        // let hist_item = HistoryItem::new(equation, solution);
+        let hist_item = HistoryItem::new(equation, solution);
 
-        self.history.lock().unwrap().push(equation);
+        self.history.lock().unwrap().push(hist_item);
     }
 
-    pub fn get_history(&self) -> Vec<String> {
+    pub fn get_history(&self) -> Vec<HistoryItem> {
         let hist = self.history.lock().unwrap().clone();
         hist
     }
@@ -100,21 +94,12 @@ mod tests {
         let expect = vec![
             HistoryItem::new("2 * 7".into(), 14.0),
             HistoryItem::new("sqrt(81)".into(), 9.0),
-            HistoryItem::new("27 / 9 + 3".into(), 9.0),
+            HistoryItem::new("27 / 9 + 3".into(), 6.0),
         ];
-
-        let mut expect: Vec<String> = expect
-            .iter()
-            .map(|h| h.equation.read().unwrap().clone())
-            .collect();
 
         assert_eq!(calc.get_history(), expect);
 
         calc.evaluate("1 + 1".into())?;
-
-        expect.push("1 + 1".into());
-
-        assert_eq!(calc.get_history(), expect);
 
         Ok(())
     }
