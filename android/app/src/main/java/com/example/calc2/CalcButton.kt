@@ -92,7 +92,7 @@ enum class CalcButton {
     fun ToButton(input: MutableState<TextFieldValue>) {
         val selection = input.value.selection
         val text = input.value.text
-        val newSelectionIndex = selection.end + 1
+        var newSelectionIndex = selection.end + 1
 
         val newText = if (selection.collapsed) {
             val beforeCursorText = text.substring(0, selection.end)
@@ -100,8 +100,9 @@ enum class CalcButton {
             beforeCursorText + this.input() + afterCursorText
         } else {
             // Need to handle case where text is selected
-            val beforeCursorText = text.substring(0, selection.end)
+            val beforeCursorText = text.substring(0, selection.start)
             val afterCursorText = text.substring(selection.end)
+            newSelectionIndex = selection.start + 1
             beforeCursorText + this.input() + afterCursorText
         }
 
@@ -118,7 +119,7 @@ enum class CalcButton {
         val buttonName = this.buttonName()
         Button(
             modifier = Modifier
-                .height(56.dp)
+                .height(64.dp)
                 .padding(1.dp),
             shape = RoundedCornerShape(10),
             contentPadding = PaddingValues(0.dp),

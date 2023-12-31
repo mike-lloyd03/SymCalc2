@@ -25,7 +25,7 @@ fun ButtonGrid(input: MutableState<TextFieldValue>, evalFunction: () -> Unit) {
         )
     }
 
-    fun deleteChar() {
+    fun handleDelete() {
         val selection = input.value.selection
         val text = input.value.text
         var newSelectionIndex = selection.end.minus(1).coerceAtLeast(0)
@@ -40,7 +40,6 @@ fun ButtonGrid(input: MutableState<TextFieldValue>, evalFunction: () -> Unit) {
             val afterCursorText = text.substring(selection.end)
             beforeCursorText + afterCursorText
         } else {
-            // Need to handle case where text is selected
             val beforeCursorText = text.substring(0, selection.start)
             val afterCursorText = text.substring(selection.end)
             newSelectionIndex = selection.start
@@ -93,10 +92,10 @@ fun ButtonGrid(input: MutableState<TextFieldValue>, evalFunction: () -> Unit) {
     ) {
         items(buttons) { button ->
             when (button) {
+                CalcButton.Enter -> button.ToButton(evalFunction)
                 CalcButton.LArrow -> button.ToButton { moveCursor(-1) }
                 CalcButton.RArrow -> button.ToButton { moveCursor(1) }
-                CalcButton.Enter -> button.ToButton(evalFunction)
-                CalcButton.Delete -> button.ToButton { deleteChar() }
+                CalcButton.Delete -> button.ToButton { handleDelete() }
 
                 else -> button.ToButton(input)
             }
