@@ -51,10 +51,11 @@ fun Calculator(calc: Calc) {
         mutableStateOf(calc.getHistory())
     }
 
-    fun evalFunction(): Unit {
+    fun evalFunction() {
         try {
             calc.evaluate(input.value.text)
             history = calc.getHistory()
+            input.value = TextFieldValue("")
         } catch (e: Exception) {
             println(e)
         }
@@ -83,8 +84,7 @@ fun Calculator(calc: Calc) {
                     )
                     Text(
                         text = history.solution.toString(),
-                        modifier = Modifier
-                            .padding(8.dp)
+                        modifier = Modifier.padding(8.dp)
                     )
                 }
             }
@@ -95,17 +95,8 @@ fun Calculator(calc: Calc) {
                 input.value = newInput
             },
             singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
         ButtonGrid(input) { evalFunction() }
     }
 }
-
-//@Preview
-//@Composable
-//fun InputFieldPreview() {
-//    Calc2Theme {
-//        InputField()
-//    }
-//}
