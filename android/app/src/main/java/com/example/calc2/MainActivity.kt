@@ -29,7 +29,10 @@ import com.example.calc2.ui.theme.Calc2Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val calc = Calc()
+        val filesdir = filesDir
+
+
+        val calc = Calc(filesdir.toString())
         super.onCreate(savedInstanceState)
         setContent {
             Calc2Theme {
