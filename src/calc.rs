@@ -85,11 +85,13 @@ impl HistoryItem {
 mod tests {
     use super::*;
 
-    const DATA_PATH: &str = "./test";
+    fn test_calc(pool: SqlitePool) -> Calc {
+        Calc { db: pool }
+    }
 
     #[sqlx::test]
-    fn test_simple_arithmetic() -> Result<(), CalcError> {
-        let calc = Calc::new(DATA_PATH)?;
+    fn test_simple_arithmetic(pool: SqlitePool) -> Result<(), CalcError> {
+        let calc = test_calc(pool);
 
         assert_eq!(calc.evaluate("2 + 2".into())?, 4.0);
         assert_eq!(calc.evaluate("2 - 2".into())?, 0.0);
@@ -100,24 +102,24 @@ mod tests {
     }
 
     #[sqlx::test]
-    fn test_errors() -> Result<(), CalcError> {
-        let calc = Calc::new(DATA_PATH)?;
+    fn test_errors(pool: SqlitePool) -> Result<(), CalcError> {
+        let calc = test_calc(pool);
 
         assert!(calc.evaluate("2 x 2".into()).is_err());
         Ok(())
     }
 
     #[sqlx::test]
-    fn test_complex_arithmetic() -> Result<(), CalcError> {
-        let calc = Calc::new(DATA_PATH)?;
+    fn test_complex_arithmetic(pool: SqlitePool) -> Result<(), CalcError> {
+        let calc = test_calc(pool);
 
         assert_eq!(calc.evaluate("2 (5 + 7)".into())?, 24.0);
         Ok(())
     }
 
     #[sqlx::test]
-    fn test_history() -> Result<(), CalcError> {
-        let calc = Calc::new(DATA_PATH)?;
+    fn test_history(pool: SqlitePool) -> Result<(), CalcError> {
+        let calc = test_calc(pool);
 
         sqlx::query!("delete from history")
             .execute(&calc.db)
