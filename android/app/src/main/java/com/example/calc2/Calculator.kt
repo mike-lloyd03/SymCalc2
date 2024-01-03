@@ -14,9 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.calc2.shared.Calc
+import com.example.calc2.shared.HistoryItem
 
 @Composable
 fun Calculator(calc: Calc) {
@@ -35,6 +37,21 @@ fun Calculator(calc: Calc) {
         }
     }
 
+    fun deleteHistoryItem(historyItem: HistoryItem) {
+        logger.info { "Deleting history item $historyItem.id" }
+        if (historyItem.id != null) {
+            calc.deleteHistory(historyItem.id!!)
+            history = calc.getHistory()
+        }
+    }
+
+    fun copyHistoryItem(historyItem: HistoryItem) {
+        input.value = TextFieldValue(
+            text = historyItem.equation,
+            selection = TextRange(historyItem.equation.length)
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +65,7 @@ fun Calculator(calc: Calc) {
                 .fillMaxWidth()
         ) {
             items(history.reversed()) { history ->
-                HistoryRow(input, history)
+                HistoryRow(history, ::copyHistoryItem, ::deleteHistoryItem)
             }
         }
         TextField(
@@ -59,6 +76,6 @@ fun Calculator(calc: Calc) {
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-        ButtonGrid(input) { evalFunction() }
+        ButtonGrid(input, ::evalFunction)
     }
 }

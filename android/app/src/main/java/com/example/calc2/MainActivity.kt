@@ -9,10 +9,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.calc2.shared.Calc
 import com.example.calc2.ui.theme.Calc2Theme
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+val logger = KotlinLogging.logger {}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val calc = Calc(filesDir.toString())
+        logger.info { "Starting app" }
 
         super.onCreate(savedInstanceState)
         setContent {

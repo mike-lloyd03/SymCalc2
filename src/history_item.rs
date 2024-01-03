@@ -10,6 +10,8 @@ pub struct HistoryItem {
     solution: f64,
 }
 
+impl HistoryItem {}
+
 impl HistoryItem {
     pub fn new(equation: String, solution: f64) -> Self {
         Self {
@@ -39,6 +41,13 @@ impl HistoryItem {
 
     pub async fn delete(&self, pool: &SqlitePool) -> Result<(), CalcError> {
         Ok(sqlx::query!("delete from history where id = ?", self.id)
+            .execute(pool)
+            .await
+            .map(|_| ())?)
+    }
+
+    pub async fn delete_by_id(pool: &SqlitePool, id: i64) -> Result<(), CalcError> {
+        Ok(sqlx::query!("delete from history where id = ?", id)
             .execute(pool)
             .await
             .map(|_| ())?)
