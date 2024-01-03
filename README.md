@@ -10,4 +10,4 @@ This project serves two purposes:
 
 2. Everything should be rewritten in Rust. Linux. Fish shell. Reality. This project is a way for me to explore writing Android apps (which I have basically no idea how to do) in Rust. It uses [Mozilla's Uniffi](https://github.com/mozilla/uniffi-rs) library for generating FFI bindings from Rust to Kotlin and Swift. So all the business logic is written in the master programming language and all the UI tomfoolery can be in whatever lesser language is needed.
 
-I tried Flutter. Not a fan.
+    I tried Flutter. Not a fan.
