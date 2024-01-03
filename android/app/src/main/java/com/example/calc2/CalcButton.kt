@@ -7,10 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 
 enum class CalcButton {
@@ -45,7 +42,7 @@ enum class CalcButton {
     Keyboard,
     Enter;
 
-    private fun input(): String {
+    fun input(): String {
         return when (this) {
             Num0 -> "0"
             Num1 -> "1"
@@ -85,32 +82,6 @@ enum class CalcButton {
             Enter -> "Enter"
             Sqrt -> "√"
             else -> this.input()
-        }
-    }
-
-    @Composable
-    fun ToButton(input: MutableState<TextFieldValue>) {
-        val selection = input.value.selection
-        val text = input.value.text
-        var newSelectionIndex = selection.end + this.input().length
-
-        val newText = if (selection.collapsed) {
-            val beforeCursorText = text.substring(0, selection.end)
-            val afterCursorText = text.substring(selection.end)
-            beforeCursorText + this.input() + afterCursorText
-        } else {
-            // Need to handle case where text is selected
-            val beforeCursorText = text.substring(0, selection.start)
-            val afterCursorText = text.substring(selection.end)
-            newSelectionIndex = selection.start + 1
-            beforeCursorText + this.input() + afterCursorText
-        }
-
-        this.ToButton {
-            input.value = TextFieldValue(
-                text = newText,
-                selection = TextRange(newSelectionIndex)
-            )
         }
     }
 

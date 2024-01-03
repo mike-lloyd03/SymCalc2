@@ -1,10 +1,8 @@
-use std::convert::Into;
-
-use crate::{db, error::CalcError};
+use crate::{db, error::CalcError, history_item::HistoryItem};
 use async_std::task;
 use kalk::parser;
 use sqlx::SqlitePool;
-use uniffi::deps::{anyhow::Context, log::info};
+use uniffi::deps::log::info;
 
 #[derive(uniffi::Object)]
 pub struct Calc {
@@ -13,11 +11,11 @@ pub struct Calc {
 
 #[uniffi::export]
 impl Calc {
-    #[allow(clippy::new_without_default)]
     #[uniffi::constructor]
-    pub fn new(data_path: &str) -> Result<Self, CalcError> {
+    /// Create a new Calc instance with the database stored at the data directory `data_dir`
+    pub fn new(data_dir: &str) -> Result<Self, CalcError> {
         info!("Creating Calc instance");
-        let db_path = format!("sqlite://{}/data.db", data_path.trim_end_matches('/'));
+        let db_path = format!("sqlite://{}/data.db", data_dir.trim_end_matches('/'));
         let db = task::block_on(db::connect(&db_path))?;
         Ok(Self { db })
     }
@@ -43,41 +41,6 @@ impl Calc {
     pub fn get_history(&self) -> Result<Vec<HistoryItem>, CalcError> {
         info!("Getting all history");
         task::block_on(HistoryItem::get_all(&self.db))
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, uniffi::Record)]
-pub struct HistoryItem {
-    id: Option<i64>,
-    equation: String,
-    solution: f64,
-}
-
-impl HistoryItem {
-    fn new(equation: String, solution: f64) -> Self {
-        Self {
-            id: None,
-            equation,
-            solution,
-        }
-    }
-
-    async fn create(&self, pool: &SqlitePool) -> Result<(), CalcError> {
-        Ok(sqlx::query!(
-            "insert into history (equation, solution) values (?, ?)",
-            self.equation,
-            self.solution
-        )
-        .execute(pool)
-        .await
-        .map(|_| ())?)
-    }
-
-    async fn get_all(pool: &SqlitePool) -> Result<Vec<Self>, CalcError> {
-        Ok(sqlx::query_as!(Self, "select * from history")
-            .fetch_all(pool)
-            .await
-            .context("Failed to get all history.")?)
     }
 }
 

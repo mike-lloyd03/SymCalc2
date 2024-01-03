@@ -52,6 +52,25 @@ fun ButtonGrid(input: MutableState<TextFieldValue>, evalFunction: () -> Unit) {
         )
     }
 
+    fun handleInput(text: String) {
+        val selection = input.value.selection
+        var newSelectionIndex = selection.end + text.length
+
+        val newText = StringBuilder(input.value.text)
+
+        if (selection.collapsed) {
+            newText.insert(selection.end, text)
+        } else {
+            newText.replace(selection.start, selection.end, text)
+            newSelectionIndex = selection.start + text.length
+        }
+
+        input.value = TextFieldValue(
+            text = newText.toString(),
+            selection = TextRange(newSelectionIndex)
+        )
+    }
+
     val buttons = listOf(
         CalcButton.Second,
         CalcButton.LParen,
@@ -96,8 +115,7 @@ fun ButtonGrid(input: MutableState<TextFieldValue>, evalFunction: () -> Unit) {
                 CalcButton.LArrow -> button.ToButton { moveCursor(-1) }
                 CalcButton.RArrow -> button.ToButton { moveCursor(1) }
                 CalcButton.Delete -> button.ToButton { handleDelete() }
-
-                else -> button.ToButton(input)
+                else -> button.ToButton { handleInput(button.input()) }
             }
         }
     }
