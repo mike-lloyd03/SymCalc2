@@ -1,5 +1,6 @@
+use anyhow::Context;
+use log::info;
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
-use uniffi::deps::{anyhow::Context, log::info};
 
 use crate::error::CalcError;
 

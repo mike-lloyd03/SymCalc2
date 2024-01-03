@@ -1,5 +1,5 @@
+use anyhow;
 use sqlx::Error;
-use uniffi::deps::anyhow;
 
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum CalcError {

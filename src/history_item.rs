@@ -1,5 +1,5 @@
+use anyhow::Context;
 use sqlx::SqlitePool;
-use uniffi::deps::anyhow::Context;
 
 use crate::error::CalcError;
 

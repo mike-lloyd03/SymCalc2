@@ -1,8 +1,8 @@
 use crate::{db, error::CalcError, history_item::HistoryItem};
 use async_std::task;
 use kalk::parser;
+use log::info;
 use sqlx::SqlitePool;
-use uniffi::deps::log::info;
 
 #[derive(uniffi::Object)]
 pub struct Calc {
@@ -11,8 +11,8 @@ pub struct Calc {
 
 #[uniffi::export]
 impl Calc {
-    #[uniffi::constructor]
     /// Create a new Calc instance with the database stored at the data directory `data_dir`
+    #[uniffi::constructor]
     pub fn new(data_dir: &str) -> Result<Self, CalcError> {
         info!("Creating Calc instance");
         let db_path = format!("sqlite://{}/data.db", data_dir.trim_end_matches('/'));
