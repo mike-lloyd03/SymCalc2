@@ -1,6 +1,6 @@
 emulator:
-   ANDROID_HOME="" ANDROID_SDK_ROOT="$HOME/Android/Sdk" ~/Android/Sdk/emulator/emulator @Pixel_7_API_34 \
-       # -gpu guest \
+   ${ANDROID_HOME}/emulator/emulator @Pixel_7_API_34 \
+       -gpu guest \
        -no-snapshot \
        -wipe-data
 
