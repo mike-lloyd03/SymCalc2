@@ -5,9 +5,8 @@
 	import { getHistory } from '../lib/utils';
 
 	let input: ExpressionInput = $state({ text: '', cursorPos: 0 });
-	let result = $state('');
-
 	let history: HistoryItem[] = $state([]);
+	let historyDiv: HTMLDivElement;
 
 	$effect(() => {
 		getHistory().then((v) => {
@@ -18,15 +17,15 @@
 	async function calc() {
 		let solution: number = await invoke('calc', { expression: input.text });
 		history.push({ equation: input.text, solution });
-		result = solution.toString();
 		input.text = '';
 		input.cursorPos = 0;
 		history = await getHistory();
+		historyDiv.scroll({ top: historyDiv.scrollHeight, behavior: 'smooth' });
 	}
 </script>
 
 <main class="container h-screen flex flex-col text-white p-2">
-	<div class="overflow-y-auto flex-1 content-end">
+	<div class="overflow-y-auto flex-1 content-end" bind:this={historyDiv}>
 		{#each history as item}
 			<div class="flex justify-between my-1">
 				<div>{item.equation}</div>

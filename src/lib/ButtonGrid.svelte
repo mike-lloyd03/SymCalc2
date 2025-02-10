@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { cursorPosition } from '@tauri-apps/api/window';
 	import Button from './Button.svelte';
 	import type { ExpressionInput } from './types';
 
@@ -12,7 +11,11 @@
 
 	function del() {
 		input.text = input.text.slice(0, input.cursorPos - 1) + input.text.slice(input.cursorPos);
-		input.cursorPos -= 1;
+		let newPos = input.cursorPos - 1;
+		if (newPos < 0) {
+			newPos = 0;
+		}
+		input.cursorPos = newPos;
 	}
 
 	function move(amt: number) {
