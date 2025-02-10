@@ -4,6 +4,7 @@ export type ExpressionInput = {
 };
 
 export type HistoryItem = {
-	expression: string;
-	result: string;
+	id?: number;
+	equation: string;
+	solution: number;
 };

@@ -2,17 +2,26 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import ButtonGrid from '../lib/ButtonGrid.svelte';
 	import type { ExpressionInput, HistoryItem } from '../lib/types';
+	import { getHistory } from '../lib/utils';
 
 	let input: ExpressionInput = $state({ text: '', cursorPos: 0 });
 	let result = $state('');
 
 	let history: HistoryItem[] = $state([]);
 
+	$effect(() => {
+		getHistory().then((v) => {
+			history = v;
+		});
+	});
+
 	async function calc() {
-		result = await invoke('calc', { expression: input.text });
-		history.push({ expression: input.text, result });
+		let solution: number = await invoke('calc', { expression: input.text });
+		history.push({ equation: input.text, solution });
+		result = solution.toString();
 		input.text = '';
 		input.cursorPos = 0;
+		history = await getHistory();
 	}
 </script>
 
@@ -20,8 +29,8 @@
 	<div class="overflow-y-auto flex-1 content-end">
 		{#each history as item}
 			<div class="flex justify-between my-1">
-				<div>{item.expression}</div>
-				<div>{item.result}</div>
+				<div>{item.equation}</div>
+				<div>{item.solution}</div>
 			</div>
 		{/each}
 	</div>
