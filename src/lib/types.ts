@@ -6,5 +6,10 @@ export type ExpressionInput = {
 export type HistoryItem = {
 	id?: number;
 	equation: string;
-	solution: number;
+	solution?: number;
+};
+
+export type CalcError = {
+	kind: "mathError" | "dbError" | "osError";
+	msg: string;
 };

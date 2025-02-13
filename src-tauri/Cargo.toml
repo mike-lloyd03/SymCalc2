@@ -27,3 +27,4 @@ sqlx = { version = "0.8.3", features = ["sqlite", "runtime-async-std"] }
 async-std = "1.13.0"
 tauri-plugin-log = "2"
 log = "0.4.25"
+thiserror = "2.0.11"

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ExpressionInput, HistoryItem } from './types';
-	import { warn } from '@tauri-apps/plugin-log';
 
 	interface Props {
 		item: HistoryItem;
@@ -19,5 +18,5 @@
 	role="none"
 >
 	<div>{item.equation}</div>
-	<div>{item.solution}</div>
+	<div>{item.solution || ' '}</div>
 </div>

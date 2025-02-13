@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invoke } from '@tauri-apps/api/core';
 	import ButtonGrid from '../lib/ButtonGrid.svelte';
-	import type { ExpressionInput, HistoryItem } from '../lib/types';
+	import type { ExpressionInput, HistoryItem, CalcError } from '../lib/types';
 	import { getHistory, scrollToBottom } from '../lib/utils';
 	import HistoryRow from '$lib/HistoryRow.svelte';
 	import Modal from '$lib/modal/Modal.svelte';
@@ -10,6 +10,7 @@
 	let history: HistoryItem[] = $state([]);
 	let historyDiv: HTMLDivElement;
 	let editHistoryItem: HistoryItem | undefined = $state(undefined);
+	let errorMsg: string | undefined = $state('Err msg');
 
 	$effect(() => {
 		getHistory().then((v) => {
@@ -19,12 +20,18 @@
 	});
 
 	async function calc() {
-		let solution: number = await invoke('calc', { expression: input.text });
-		history.push({ equation: input.text, solution });
-		input.text = '';
-		input.cursorPos = 0;
-		history = await getHistory();
-		scrollToBottom(historyDiv);
+		invoke('calc', { expression: input.text })
+			.then((s) => {
+				input.text = '';
+				input.cursorPos = 0;
+				history.push({ equation: input.text, solution: s });
+
+				getHistory().then((h) => {
+					history = h;
+					scrollToBottom(historyDiv);
+				});
+			})
+			.catch((e: CalcError) => (errorMsg = e.msg));
 	}
 
 	async function deleteHistoryItem() {
@@ -35,6 +42,15 @@
 </script>
 
 <main class="relative container h-screen text-white">
+	{#if errorMsg}
+		<div
+			class="absolute rounded-md bg-red-900 border border-red-950 z-50 w-full flex justify-between p-2"
+		>
+			<p>{errorMsg}</p>
+			<button onclick={() => (errorMsg = undefined)}>X</button>
+		</div>
+	{/if}
+
 	<div class="absolute h-screen w-full flex flex-col p-2">
 		<div class="overflow-y-auto flex-1 content-end" bind:this={historyDiv}>
 			{#each history as item}

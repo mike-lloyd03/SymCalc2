@@ -57,12 +57,12 @@
 	<Button bind:input label="2" />
 	<Button bind:input label="3" />
 	<Button bind:input label="-" />
-	<Button bind:input label="~" />
+	<Button bind:input label="=" />
 
 	<Button bind:input label="y" />
 	<Button bind:input label="0" />
 	<Button bind:input label="." />
 	<Button bind:input label="," />
 	<Button bind:input label="+" />
-	<Button label="=" onclick={onsubmit} />
+	<Button label="Enter" onclick={onsubmit} />
 </div>
