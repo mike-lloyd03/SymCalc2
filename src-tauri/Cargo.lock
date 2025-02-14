@@ -4569,6 +4569,7 @@ dependencies = [
  "async-std",
  "kalk",
  "log",
+ "regex",
  "serde",
  "serde_json",
  "sqlx",

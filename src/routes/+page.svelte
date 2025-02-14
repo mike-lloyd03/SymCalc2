@@ -10,7 +10,7 @@
 	let history: HistoryItem[] = $state([]);
 	let historyDiv: HTMLDivElement;
 	let editHistoryItem: HistoryItem | undefined = $state(undefined);
-	let errorMsg: string | undefined = $state('Err msg');
+	let errorMsg: string | undefined = $state(undefined);
 
 	$effect(() => {
 		getHistory().then((v) => {

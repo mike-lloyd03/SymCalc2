@@ -7,6 +7,8 @@ mod commands;
 mod db;
 mod error;
 mod history_item;
+mod symbols;
+mod utils;
 
 struct App {
     db: SqlitePool,
